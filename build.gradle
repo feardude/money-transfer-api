@@ -12,8 +12,17 @@ repositories {
 }
 
 dependencies {
+    compile 'org.projectlombok:lombok:1.18.4'
+    
+    // Logging
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    runtime 'org.slf4j:slf4j-log4j12:1.7.25'
+    runtime 'log4j:log4j:1.2.17'
+    
+    // Persistence
     compile 'org.hsqldb:hsqldb:2.4.1'
     
+    // Frameworks
     compile 'com.google.inject:guice:4.2.2'
     compile 'com.sparkjava:spark-core:2.8.0'
     
