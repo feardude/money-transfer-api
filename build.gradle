@@ -21,6 +21,7 @@ dependencies {
     
     // Persistence
     compile 'org.hsqldb:hsqldb:2.4.1'
+    compile 'org.sql2o:sql2o:1.6.0'
     
     // Frameworks
     compile 'com.google.inject:guice:4.2.2'
