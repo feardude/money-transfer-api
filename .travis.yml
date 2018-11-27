@@ -7,3 +7,14 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
+
+addons:
+  sonarcloud:
+    organization: "feardude-github"
+    token:
+      secure: "ZEz0FM0A+mhtmfrMzXN+eQXd0JmOplDi9oRtYljTJWg/rl6+eTtTRD56TAx98uiLfjpvGc/387/SWityUu8dfCnlvTVKdBCXQYmCxPGaUd81LawrJtut+/6aW4lhBUnwFTJCWNv6deOjy9LUadNGoZCrMtVhTWmAUNAFRb2H7w8eq/10nVddjYyabRhBitBTxFzGeekV1RN3W+PhtmMCkeCXRMQDCG0yhhD0kc0YXIoneawbbCuDknY0YeLXVk1d56Dq3dc5+3TefkdbMSyi5k4YOFFGm3y0FYUeYBfJaWjyk+gqc4FoylDGsB08ixeTSFtCIPdhpVYREIWLxGXF81O/ya8ZWFFtehgh+PS61QD0QLGZm9fuP7cHRMEmGpLOx8/ELmICQwv4pvvzL7gzfaHREWzpsfP1WQJJAs2GmSosb3x4LwWVrSbu5a2+l2IVvURwcYFWICjw11Aa0OLVED7U9EL4x594S5+qHkDivJ2Zx4rVz1B54C/4AEk7TPsJZDShDejlivcXfjIDj3PDikvkY6WlRlWIPwN12jRjIUe+rE9ZBH3PzC1kLO8s7jRIY8hY0rCTsqUKrSJrw8TQwkcjMAi3JkpGllvbWqJlN1bzdKuatpKNDcQLKYBOb85dHZJgtJ8BWRk4hdP26eGt86e4RWS4/0qPE8AcrzbdIDk="
+
+script:
+  - ./gradlew check
+  - sonar-scanner
