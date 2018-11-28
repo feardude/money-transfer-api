@@ -1,14 +1,15 @@
 package ru.smax.trial.revolut;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.sql2o.Sql2o;
 import ru.smax.trial.revolut.dao.AccountsDao;
 import ru.smax.trial.revolut.dao.Sql2oAccountsDao;
 import ru.smax.trial.revolut.exception.InsufficientFundsException;
+import ru.smax.trial.revolut.model.TransferMoneyPayload;
 
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -62,18 +63,18 @@ public class HelloSpark {
         post(
                 "/transfer",
                 (request, response) -> {
-                    final Long fromAccountId = Long.valueOf(request.queryParams("fromAccountId"));
-                    final Long toAccountId = Long.valueOf(request.queryParams("toAccountId"));
-                    final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(request.queryParams("amount")));
+                    final ObjectMapper mapper = new ObjectMapper();
+                    final TransferMoneyPayload payload = mapper.readValue(request.body(), TransferMoneyPayload.class);
+
                     log.info("Requested transfer [from-account-id={}, to-account-id={}, amount={}]",
-                            fromAccountId, toAccountId, amount
+                            payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
                     );
 
                     try {
-                        accountsDao.transferMoney(fromAccountId, toAccountId, amount);
+                        accountsDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
                         response.status(200);
                         return format("Money were transferred successfully [from-account-id=%s, to-account-id=%s, amount=%s]",
-                                fromAccountId, toAccountId, amount
+                                payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
                         );
                     } catch (InsufficientFundsException e) {
                         log.error(e.toString());
