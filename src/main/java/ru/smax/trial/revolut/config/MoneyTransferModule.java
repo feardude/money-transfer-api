@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.sql2o.Sql2o;
 import ru.smax.trial.revolut.MoneyTransferWebService;
-import ru.smax.trial.revolut.dao.AccountsDao;
-import ru.smax.trial.revolut.dao.Sql2oAccountsDao;
+import ru.smax.trial.revolut.service.AccountService;
+import ru.smax.trial.revolut.service.AccountServiceImpl;
+import ru.smax.trial.revolut.service.dao.AccountDao;
+import ru.smax.trial.revolut.service.dao.Sql2oAccountsDao;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,7 +26,8 @@ public class MoneyTransferModule extends AbstractModule {
     protected void configure() {
         bind(MoneyTransferWebService.class).in(Singleton.class);
 
-        bind(AccountsDao.class).to(Sql2oAccountsDao.class);
+        bind(AccountService.class).to(AccountServiceImpl.class).in(Singleton.class);
+        bind(AccountDao.class).to(Sql2oAccountsDao.class).in(Singleton.class);
     }
 
     @Provides

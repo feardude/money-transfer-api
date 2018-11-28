@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import ru.smax.trial.revolut.dao.AccountsDao;
-import ru.smax.trial.revolut.exception.InsufficientFundsException;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
+import ru.smax.trial.revolut.service.AccountService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +20,11 @@ import static spark.Spark.redirect;
 
 @Slf4j
 public class MoneyTransferWebService {
-    private final AccountsDao accountsDao;
+    private final AccountService accountService;
 
     @Inject
-    public MoneyTransferWebService(AccountsDao accountsDao) {
-        this.accountsDao = accountsDao;
+    public MoneyTransferWebService(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     void run() {
@@ -53,11 +52,11 @@ public class MoneyTransferWebService {
         );
 
         get("/accounts",
-                (request, response) -> toJson(accountsDao.getAccounts())
+                (request, response) -> toJson(accountService.getAccounts())
         );
 
         get("/accounts/:id",
-                (request, response) -> toJson(accountsDao.getAccount(Long.valueOf(request.params("id"))))
+                (request, response) -> toJson(accountService.getAccount(Long.valueOf(request.params("id"))))
         );
 
         post("/transfer",
@@ -65,24 +64,11 @@ public class MoneyTransferWebService {
                     try {
                         final ObjectMapper mapper = new ObjectMapper();
                         final TransferMoneyPayload payload = mapper.readValue(request.body(), TransferMoneyPayload.class);
-
-                        log.info("Requested transfer [from-account-id={}, to-account-id={}, amount={}]",
-                                payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
-                        );
-
-                        accountsDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
-                        log.info("Money were transferred successfully [from-account-id={}, to-account-id={}, amount={}]",
-                                payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
-                        );
-
+                        accountService.transferMoney(payload);
                         response.status(HTTP_OK);
                         return "";
                     } catch (JsonProcessingException e) {
                         log.error("Invalid request payload", e);
-                        response.status(HTTP_BAD_REQUEST);
-                        return e.getMessage();
-                    } catch (InsufficientFundsException e) {
-                        log.error(e.toString());
                         response.status(HTTP_BAD_REQUEST);
                         return e.getMessage();
                     }
@@ -92,6 +78,6 @@ public class MoneyTransferWebService {
 
     private String toJson(Object object) throws JsonProcessingException {
         final ObjectMapper mapper = new ObjectMapper();
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        return mapper.writeValueAsString(object);
     }
 }
