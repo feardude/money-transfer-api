@@ -1,6 +1,5 @@
 package ru.smax.trial.revolut.service.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,9 +13,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static java.math.BigDecimal.ROUND_HALF_UP;
 import static org.junit.Assert.assertEquals;
 
-@Slf4j
 public class AccountDaoIT {
     private static final String DB_URL = "jdbc:hsqldb:mem:testinmemdb";
     private AccountDao accountDao;
@@ -50,7 +49,7 @@ public class AccountDaoIT {
                     "create table if not exists accounts (" +
                             "  id int primary key," +
                             "  idReal varchar(128) unique not null," +
-                            "  amount decimal default 0" +
+                            "  amount decimal(10,6) default 0" +
                             ")"
             );
             connection.commit();
@@ -62,17 +61,22 @@ public class AccountDaoIT {
         }
     }
 
-
     @Test
     public void transferMoney_success() throws InsufficientFundsException {
-        accountDao.transferMoney(1, 2, BigDecimal.TEN);
+        accountDao.transferMoney(1, 2, withScale(0.5d));
 
-        final int expected1 = 990;
-        final int actual1 = accountDao.getAccount(1L).getAmount().intValue();
+        final BigDecimal expected1 = withScale(999.5d);
+        final BigDecimal actual1 = accountDao.getAccount(1L).getAmount();
         assertEquals(expected1, actual1);
 
-        final int expected2 = 1010;
-        final int actual2 = accountDao.getAccount(2L).getAmount().intValue();
+        final BigDecimal expected2 = withScale(1000.5d);
+        final BigDecimal actual2 = accountDao.getAccount(2L).getAmount();
         assertEquals(expected2, actual2);
+    }
+
+
+    private static BigDecimal withScale(double value) {
+        return BigDecimal.valueOf(value)
+                .setScale(6, ROUND_HALF_UP);
     }
 }

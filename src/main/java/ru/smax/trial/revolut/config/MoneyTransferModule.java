@@ -57,7 +57,7 @@ public class MoneyTransferModule extends AbstractModule {
                     "create table if not exists accounts (" +
                             "  id int primary key," +
                             "  idReal varchar(128) unique not null," +
-                            "  amount decimal default 0" +
+                            "  amount decimal(10,6) default 0" +
                             ")"
             );
             connection.commit();
