@@ -1,21 +1,20 @@
-package ru.smax.trial.revolut.dao;
+package ru.smax.trial.revolut.service.dao;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.google.inject.Inject;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
-import ru.smax.trial.revolut.exception.InsufficientFundsException;
 import ru.smax.trial.revolut.model.Account;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static java.lang.String.format;
-
-@AllArgsConstructor
-@Slf4j
-public class Sql2oAccountsDao implements AccountsDao {
+public class Sql2oAccountsDao implements AccountDao {
     private final Sql2o sql2o;
+
+    @Inject
+    public Sql2oAccountsDao(Sql2o sql2o) {
+        this.sql2o = sql2o;
+    }
 
     @Override
     public List<Account> getAccounts() {
@@ -39,7 +38,7 @@ public class Sql2oAccountsDao implements AccountsDao {
     }
 
     @Override
-    public void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount) throws InsufficientFundsException {
+    public void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount) {
         try (Connection conn = sql2o.beginTransaction()) {
             final String withdrawMoney = "update accounts " +
                     "set amount = amount - :amount " +
@@ -48,8 +47,6 @@ public class Sql2oAccountsDao implements AccountsDao {
             final String addMoney = "update accounts " +
                     "set amount = amount + :amount " +
                     "where id = :toAccountId";
-
-            validateSufficientFunds(fromAccountId, amount);
 
             conn.createQuery(withdrawMoney)
                     .addParameter("amount", amount)
@@ -62,14 +59,6 @@ public class Sql2oAccountsDao implements AccountsDao {
                     .executeUpdate();
 
             conn.commit();
-        }
-    }
-
-    private void validateSufficientFunds(long fromAccountId, BigDecimal amountToWithdraw) throws InsufficientFundsException {
-        final BigDecimal currentAmount = getAccount(fromAccountId).getAmount();
-
-        if (currentAmount.compareTo(amountToWithdraw) < 0) {
-            throw new InsufficientFundsException(format("Insufficient funds for [account-id=%s]", fromAccountId));
         }
     }
 }

@@ -1,12 +1,10 @@
-package ru.smax.trial.revolut.dao;
+package ru.smax.trial.revolut.service.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.sql2o.Sql2o;
 import ru.smax.trial.revolut.exception.InsufficientFundsException;
 
@@ -17,15 +15,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.rules.ExpectedException.none;
 
 @Slf4j
-public class AccountsDaoTest {
+public class AccountDaoIT {
     private static final String DB_URL = "jdbc:hsqldb:mem:testinmemdb";
-    private AccountsDao accountsDao;
-
-    @Rule
-    public final ExpectedException expectedException = none();
+    private AccountDao accountDao;
 
     @AfterClass
     public static void destroy() throws SQLException {
@@ -45,7 +39,7 @@ public class AccountsDaoTest {
         dataSource.setUrl(DB_URL);
 
         final Sql2o sql2o = new Sql2o(dataSource);
-        accountsDao = new Sql2oAccountsDao(sql2o);
+        accountDao = new Sql2oAccountsDao(sql2o);
     }
 
     private void populateDatabase() throws SQLException {
@@ -71,21 +65,14 @@ public class AccountsDaoTest {
 
     @Test
     public void transferMoney_success() throws InsufficientFundsException {
-        accountsDao.transferMoney(1, 2, BigDecimal.TEN);
+        accountDao.transferMoney(1, 2, BigDecimal.TEN);
 
         final int expected1 = 990;
-        final int actual1 = accountsDao.getAccount(1L).getAmount().intValue();
+        final int actual1 = accountDao.getAccount(1L).getAmount().intValue();
         assertEquals(expected1, actual1);
 
         final int expected2 = 1010;
-        final int actual2 = accountsDao.getAccount(2L).getAmount().intValue();
+        final int actual2 = accountDao.getAccount(2L).getAmount().intValue();
         assertEquals(expected2, actual2);
-    }
-
-    @Test
-    public void transferMoney_insufficientFunds() throws InsufficientFundsException {
-        expectedException.expect(InsufficientFundsException.class);
-        expectedException.expectMessage("Insufficient funds for [account-id=1]");
-        accountsDao.transferMoney(1, 2, BigDecimal.valueOf(2000));
     }
 }
