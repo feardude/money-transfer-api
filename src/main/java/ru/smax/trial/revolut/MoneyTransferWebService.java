@@ -35,7 +35,7 @@ public class MoneyTransferWebService {
         );
 
         after("/*",
-                (request, response) -> log.info("{}: {}, response: status={}, body=[{}]",
+                (request, response) -> log.info("{}: {}, response status = {}",
                         request.requestMethod(), request.uri(),
                         response.status(), response.body()
                 )
@@ -65,31 +65,27 @@ public class MoneyTransferWebService {
 
         post("/transfer",
                 (request, response) -> {
-                    try {
-                        final ObjectMapper mapper = new ObjectMapper();
-                        final TransferMoneyPayload payload = mapper.readValue(request.body(), TransferMoneyPayload.class);
-                        accountService.transferMoney(payload);
-                        response.status(HTTP_OK);
-                        return "";
-                    } catch (JsonProcessingException e) {
-                        log.error("Invalid request payload", e);
-                        response.status(HTTP_BAD_REQUEST);
-                        return e.getMessage();
-                    }
+                    final ObjectMapper mapper = new ObjectMapper();
+                    final TransferMoneyPayload payload = mapper.readValue(request.body(), TransferMoneyPayload.class);
+                    accountService.transferMoney(payload);
+                    response.status(HTTP_OK);
+                    return "";
                 }
         );
     }
 
     private void exceptionHandling() {
-        get("/throwexception",
-                (request, response) -> {
-                    throw new TransferMoneyException();
-                }
-        );
-
         exception(TransferMoneyException.class,
                 (exception, request, response) -> {
                     log.error(exception.getMessage(), exception);
+                    response.status(HTTP_BAD_REQUEST);
+                    response.body(exception.getMessage());
+                }
+        );
+
+        exception(JsonProcessingException.class,
+                (exception, request, response) -> {
+                    log.error("Invalid request payload", exception);
                     response.status(HTTP_BAD_REQUEST);
                     response.body(exception.getMessage());
                 }
