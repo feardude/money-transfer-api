@@ -1,9 +1,9 @@
 plugins {
-    id 'java'
+    id "java"
 }
 
-group 'ru.smax.trial'
-version '1.0-SNAPSHOT'
+group "ru.smax.trial"
+version "1.0-SNAPSHOT"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -12,20 +12,38 @@ repositories {
 }
 
 dependencies {
-    compile 'org.projectlombok:lombok:1.18.4'
-    
+    def version = [
+            jackson: '2.9.7',
+            lombok : '1.16.10',
+
+            slf4j  : '1.7.25',
+            log4j  : '1.2.17',
+
+            hsqldb : '2.4.1',
+            sql2o  : '1.6.0',
+
+            guice  : '4.2.2',
+            spark  : '2.8.0',
+
+            junit  : '4.12'
+    ]
+
+    compile "org.projectlombok:lombok:${version.lombok}"
+    compile "com.fasterxml.jackson.core:jackson-core:${version.jackson}"
+    compile "com.fasterxml.jackson.core:jackson-databind:${version.jackson}"
+
     // Logging
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    runtime 'org.slf4j:slf4j-log4j12:1.7.25'
-    runtime 'log4j:log4j:1.2.17'
-    
+    compile "org.slf4j:slf4j-api:${version.slf4j}"
+    runtime "org.slf4j:slf4j-log4j12:${version.slf4j}"
+    runtime "log4j:log4j:${version.log4j}"
+
     // Persistence
-    compile 'org.hsqldb:hsqldb:2.4.1'
-    compile 'org.sql2o:sql2o:1.6.0'
-    
+    compile "org.hsqldb:hsqldb:${version.hsqldb}"
+    compile "org.sql2o:sql2o:${version.sql2o}"
+
     // Frameworks
-    compile 'com.google.inject:guice:4.2.2'
-    compile 'com.sparkjava:spark-core:2.8.0'
-    
-    testCompile 'junit:junit:4.12'
+    compile "com.google.inject:guice:${version.guice}"
+    compile "com.sparkjava:spark-core:${version.spark}"
+
+    testCompile "junit:junit:${version.junit}"
 }

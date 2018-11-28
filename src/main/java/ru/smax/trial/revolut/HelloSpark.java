@@ -1,14 +1,16 @@
 package ru.smax.trial.revolut;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.sql2o.Sql2o;
 import ru.smax.trial.revolut.dao.AccountsDao;
 import ru.smax.trial.revolut.dao.Sql2oAccountsDao;
 import ru.smax.trial.revolut.exception.InsufficientFundsException;
+import ru.smax.trial.revolut.model.TransferMoneyPayload;
 
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,6 +18,8 @@ import java.sql.Statement;
 import java.util.List;
 
 import static java.lang.String.format;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.stream.Collectors.toList;
 import static spark.Spark.get;
 import static spark.Spark.post;
@@ -62,22 +66,26 @@ public class HelloSpark {
         post(
                 "/transfer",
                 (request, response) -> {
-                    final Long fromAccountId = Long.valueOf(request.queryParams("fromAccountId"));
-                    final Long toAccountId = Long.valueOf(request.queryParams("toAccountId"));
-                    final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(request.queryParams("amount")));
-                    log.info("Requested transfer [from-account-id={}, to-account-id={}, amount={}]",
-                            fromAccountId, toAccountId, amount
-                    );
-
                     try {
-                        accountsDao.transferMoney(fromAccountId, toAccountId, amount);
-                        response.status(200);
-                        return format("Money were transferred successfully [from-account-id=%s, to-account-id=%s, amount=%s]",
-                                fromAccountId, toAccountId, amount
+                        final ObjectMapper mapper = new ObjectMapper();
+                        final TransferMoneyPayload payload = mapper.readValue(request.body(), TransferMoneyPayload.class);
+
+                        log.info("Requested transfer [from-account-id={}, to-account-id={}, amount={}]",
+                                payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
                         );
+
+                        accountsDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
+                        response.status(HTTP_OK);
+                        return format("Money were transferred successfully [from-account-id=%s, to-account-id=%s, amount=%s]",
+                                payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
+                        );
+                    } catch (JsonProcessingException e) {
+                        log.error("Invalid request payload", e);
+                        response.status(HTTP_BAD_REQUEST);
+                        return e.getMessage();
                     } catch (InsufficientFundsException e) {
                         log.error(e.toString());
-                        response.status(401);
+                        response.status(HTTP_BAD_REQUEST);
                         return e.getMessage();
                     }
                 }
