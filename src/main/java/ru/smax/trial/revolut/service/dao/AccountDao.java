@@ -11,4 +11,8 @@ public interface AccountDao {
     Account getAccount(long id);
 
     void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount);
+
+    void withdrawMoney(long accountId, BigDecimal amount);
+
+    void addMoney(long accountId, BigDecimal amount);
 }

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.smax.trial.revolut.exception.InsufficientFundsException;
 import ru.smax.trial.revolut.model.Account;
+import ru.smax.trial.revolut.model.ProcessAccountMoneyPayload;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
 import ru.smax.trial.revolut.service.dao.AccountDao;
 
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static java.lang.String.format;
+import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.ADD;
+import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.WITHDRAW;
 
 @Slf4j
 public class AccountServiceImpl implements AccountService {
@@ -39,6 +42,22 @@ public class AccountServiceImpl implements AccountService {
         accountDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
         
         log.info("Money were transferred successfully [{}]", payload.toString());
+    }
+
+    @Override
+    public void processAccountMoney(ProcessAccountMoneyPayload payload) {
+        log.info("Requested account money processing [{}]", payload.toString());
+
+        if (ADD == payload.getAction()) {
+            accountDao.addMoney(payload.getAccountId(), payload.getAmount());
+        }
+
+        if (WITHDRAW == payload.getAction()) {
+            verifyFundsSufficiency(payload.getAccountId(), payload.getAmount());
+            accountDao.withdrawMoney(payload.getAccountId(), payload.getAmount());
+        }
+
+        log.info("Account money were processed successfully [{}]", payload.toString());
     }
 
     private void verifyFundsSufficiency(long fromAccountId, BigDecimal amountToWithdraw) {
