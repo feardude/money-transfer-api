@@ -2,7 +2,7 @@ package ru.smax.trial.revolut.service;
 
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import ru.smax.trial.revolut.exception.InsufficientFundsMoneyException;
+import ru.smax.trial.revolut.exception.InsufficientFundsException;
 import ru.smax.trial.revolut.model.Account;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
 import ru.smax.trial.revolut.service.dao.AccountDao;
@@ -45,7 +45,9 @@ public class AccountServiceImpl implements AccountService {
         final BigDecimal currentAmount = getAccount(fromAccountId).getAmount();
 
         if (currentAmount.compareTo(amountToWithdraw) < 0) {
-            throw new InsufficientFundsMoneyException(format("Insufficient funds for [account-id=%s]", fromAccountId));
+            final String errorMessage = format("Insufficient funds for [account-id=%s]", fromAccountId);
+            log.error(errorMessage);
+            throw new InsufficientFundsException(errorMessage);
         }
     }
 }

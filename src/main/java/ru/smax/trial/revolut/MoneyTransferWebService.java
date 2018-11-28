@@ -77,7 +77,6 @@ public class MoneyTransferWebService {
     private void exceptionHandling() {
         exception(TransferMoneyException.class,
                 (exception, request, response) -> {
-                    log.error(exception.getMessage(), exception);
                     response.status(HTTP_BAD_REQUEST);
                     response.body(exception.getMessage());
                 }
