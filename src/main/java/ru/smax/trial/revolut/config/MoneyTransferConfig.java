@@ -19,8 +19,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 @Slf4j
-public class MoneyTransferModule extends AbstractModule {
-    private static final String DB_URL = "jdbc:hsqldb:mem:localhost";
+public class MoneyTransferConfig extends AbstractModule {
+    private final String dbUrl;
+    private final String dbUsername;
+    private final String dbPassword;
+
+    public MoneyTransferConfig() {
+        this.dbUrl = ServiceProperties.getDbUrl();
+        this.dbUsername = ServiceProperties.getDbUsername();
+        this.dbPassword = ServiceProperties.getDbPassword();
+    }
 
     @Override
     protected void configure() {
@@ -42,15 +50,15 @@ public class MoneyTransferModule extends AbstractModule {
         populateDatabase();
 
         final JDBCDataSource dataSource = new JDBCDataSource();
-        dataSource.setUrl(DB_URL);
+        dataSource.setUrl(dbUrl);
         return dataSource;
     }
 
-    private static void populateDatabase() {
+    private void populateDatabase() {
         // Only for trial demo purposes
         // Real app should not create initial data on start
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, "SA", "");
+        try (Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
              Statement statement = connection.createStatement()) {
 
             statement.execute(
