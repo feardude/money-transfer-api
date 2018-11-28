@@ -14,6 +14,8 @@ import static java.lang.String.format;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.stream.Collectors.toList;
+import static spark.Spark.after;
+import static spark.Spark.before;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
@@ -27,16 +29,25 @@ public class TransferWebService {
     }
 
     void run() {
-        get(
-                "/",
+        before("/*",
+                (request, response) -> log.info("{}: {}", request.requestMethod(), request.uri())
+        );
+
+        after("/*",
+                (request, response) -> log.info("{}: {}, response: status={}, body=[{}]",
+                        request.requestMethod(), request.uri(),
+                        response.status(), response.body()
+                )
+        );
+
+        get("/",
                 (request, response) ->
                         "Money transfer trial for Revolut" +
                                 "<br>" +
                                 "<a href='/accounts'>Accounts</a>"
         );
 
-        get(
-                "/accounts",
+        get("/accounts",
                 (request, response) -> {
                     final List<String> accountLinks = accountsDao.getAccounts().stream()
                             .map(account -> format(
@@ -53,13 +64,11 @@ public class TransferWebService {
                 }
         );
 
-        get(
-                "/accounts/:id",
+        get("/accounts/:id",
                 (request, response) -> accountsDao.getAccount(Long.valueOf(request.params("id"))).toString()
         );
 
-        post(
-                "/transfer",
+        post("/transfer",
                 (request, response) -> {
                     try {
                         final ObjectMapper mapper = new ObjectMapper();
