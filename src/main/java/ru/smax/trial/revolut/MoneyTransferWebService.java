@@ -20,11 +20,11 @@ import static spark.Spark.post;
 import static spark.Spark.redirect;
 
 @Slf4j
-public class TransferWebService {
+public class MoneyTransferWebService {
     private final AccountsDao accountsDao;
 
     @Inject
-    public TransferWebService(AccountsDao accountsDao) {
+    public MoneyTransferWebService(AccountsDao accountsDao) {
         this.accountsDao = accountsDao;
     }
 

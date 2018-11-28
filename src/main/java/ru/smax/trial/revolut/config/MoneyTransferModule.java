@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.sql2o.Sql2o;
-import ru.smax.trial.revolut.TransferWebService;
+import ru.smax.trial.revolut.MoneyTransferWebService;
 import ru.smax.trial.revolut.dao.AccountsDao;
 import ru.smax.trial.revolut.dao.Sql2oAccountsDao;
 
@@ -17,12 +17,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 @Slf4j
-public class TransferServiceModule extends AbstractModule {
+public class MoneyTransferModule extends AbstractModule {
     private static final String DB_URL = "jdbc:hsqldb:mem:localhost";
 
     @Override
     protected void configure() {
-        bind(TransferWebService.class).in(Singleton.class);
+        bind(MoneyTransferWebService.class).in(Singleton.class);
 
         bind(AccountsDao.class).to(Sql2oAccountsDao.class);
     }
