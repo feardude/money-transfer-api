@@ -51,9 +51,9 @@ public class TransferWebService {
                 (request, response) -> {
                     final List<String> accountLinks = accountsDao.getAccounts().stream()
                             .map(account -> format(
-                                    "<a href='/accounts/%s'>Account (id-real=%s)</a>",
+                                    "<a href='/accounts/%s'>%s</a>",
                                     account.getId(),
-                                    account.getIdReal()
+                                    account.toString()
                             ))
                             .collect(toList());
                     return format("<a href='/'>Home</a> " +
