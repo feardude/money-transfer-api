@@ -30,23 +30,23 @@ public class TransferServiceModule extends AbstractModule {
     @Provides
     @Singleton
     private Sql2o provideSql2o() {
-        return new Sql2o(createDataSource());
+        return new Sql2o(provideDataSource());
     }
 
-    private DataSource createDataSource() {
-        try {
-            populateDatabase();
-        } catch (SQLException e) {
-            log.error("Could not populate database", e);
-            System.exit(1);
-        }
+    @Provides
+    @Singleton
+    private DataSource provideDataSource() {
+        populateDatabase();
 
         final JDBCDataSource dataSource = new JDBCDataSource();
         dataSource.setUrl(DB_URL);
         return dataSource;
     }
 
-    private static void populateDatabase() throws SQLException {
+    private static void populateDatabase() {
+        // Only for trial demo purposes
+        // Real app should not create initial data on start
+
         try (Connection connection = DriverManager.getConnection(DB_URL, "SA", "");
              Statement statement = connection.createStatement()) {
 
@@ -63,6 +63,9 @@ public class TransferServiceModule extends AbstractModule {
             statement.executeUpdate("insert into accounts values (1, '1', 1000)");
             statement.executeUpdate("insert into accounts values (2, '2', 1000)");
             connection.commit();
+        } catch (SQLException e) {
+            log.error("Could not populate database", e);
+            System.exit(1);
         }
     }
 }
