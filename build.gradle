@@ -14,7 +14,7 @@ repositories {
 dependencies {
     def version = [
             jackson: '2.9.7',
-            lombok : '1.18.4',
+            lombok : '1.16.10',
 
             slf4j  : '1.7.25',
             log4j  : '1.2.17',
