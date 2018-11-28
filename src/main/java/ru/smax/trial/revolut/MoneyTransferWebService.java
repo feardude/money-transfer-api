@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import ru.smax.trial.revolut.exception.TransferMoneyException;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
 import ru.smax.trial.revolut.service.AccountService;
 
@@ -14,6 +15,7 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static spark.Spark.after;
 import static spark.Spark.before;
+import static spark.Spark.exception;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.redirect;
@@ -41,7 +43,9 @@ public class MoneyTransferWebService {
 
         redirect.get("/", "/api");
 
-        get("api",
+        exceptionHandling();
+
+        get("/api",
                 (request, response) -> {
                     final Map<String, String> map = new HashMap<>();
                     map.put("/accounts", "get");
@@ -72,6 +76,22 @@ public class MoneyTransferWebService {
                         response.status(HTTP_BAD_REQUEST);
                         return e.getMessage();
                     }
+                }
+        );
+    }
+
+    private void exceptionHandling() {
+        get("/throwexception",
+                (request, response) -> {
+                    throw new TransferMoneyException();
+                }
+        );
+
+        exception(TransferMoneyException.class,
+                (exception, request, response) -> {
+                    log.error(exception.getMessage(), exception);
+                    response.status(HTTP_BAD_REQUEST);
+                    response.body(exception.getMessage());
                 }
         );
     }
