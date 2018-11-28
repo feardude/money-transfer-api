@@ -10,10 +10,20 @@ import java.util.List;
 
 public class Sql2oAccountsDao implements AccountDao {
     private final Sql2o sql2o;
+    private final String withdrawMoney;
+    private final String addMoney;
 
     @Inject
     public Sql2oAccountsDao(Sql2o sql2o) {
         this.sql2o = sql2o;
+
+        withdrawMoney = "update accounts " +
+                "set amount = amount - :amount " +
+                "where id = :accountId";
+
+        addMoney = "update accounts " +
+                "set amount = amount + :amount " +
+                "where id = :accountId";
     }
 
     @Override
@@ -40,24 +50,38 @@ public class Sql2oAccountsDao implements AccountDao {
     @Override
     public void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount) {
         try (Connection conn = sql2o.beginTransaction()) {
-            final String withdrawMoney = "update accounts " +
-                    "set amount = amount - :amount " +
-                    "where id = :fromAccountId";
-
-            final String addMoney = "update accounts " +
-                    "set amount = amount + :amount " +
-                    "where id = :toAccountId";
-
             conn.createQuery(withdrawMoney)
+                    .addParameter("accountId", fromAccountId)
                     .addParameter("amount", amount)
-                    .addParameter("fromAccountId", fromAccountId)
                     .executeUpdate();
 
             conn.createQuery(addMoney)
+                    .addParameter("accountId", toAccountId)
                     .addParameter("amount", amount)
-                    .addParameter("toAccountId", toAccountId)
                     .executeUpdate();
 
+            conn.commit();
+        }
+    }
+
+    @Override
+    public void withdrawMoney(long accountId, BigDecimal amount) {
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(withdrawMoney)
+                    .addParameter("accountId", accountId)
+                    .addParameter("amount", amount)
+                    .executeUpdate();
+            conn.commit();
+        }
+    }
+
+    @Override
+    public void addMoney(long accountId, BigDecimal amount) {
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(addMoney)
+                    .addParameter("accountId", accountId)
+                    .addParameter("amount", amount)
+                    .executeUpdate();
             conn.commit();
         }
     }
