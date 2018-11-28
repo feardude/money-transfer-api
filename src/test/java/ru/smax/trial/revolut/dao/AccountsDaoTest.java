@@ -70,7 +70,7 @@ public class AccountsDaoTest {
 
 
     @Test
-    public void transferMoney_success() {
+    public void transferMoney_success() throws InsufficientFundsException {
         accountsDao.transferMoney(1, 2, BigDecimal.TEN);
 
         final int expected1 = 990;
@@ -83,7 +83,7 @@ public class AccountsDaoTest {
     }
 
     @Test
-    public void transferMoney_insufficientFunds() {
+    public void transferMoney_insufficientFunds() throws InsufficientFundsException {
         expectedException.expect(InsufficientFundsException.class);
         expectedException.expectMessage("Insufficient funds for [account-id=1]");
         accountsDao.transferMoney(1, 2, BigDecimal.valueOf(2000));
