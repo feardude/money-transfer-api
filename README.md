@@ -1,0 +1,2 @@
+[![Build Status](https://travis-ci.com/feardude/money-transfer-api.svg?branch=master)](https://travis-ci.com/feardude/money-transfer-api)
+[![QualityGate Status](https://sonarcloud.io/api/project_badges/measure?project=feardude_money-transfer-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=feardude_money-transfer-api)
