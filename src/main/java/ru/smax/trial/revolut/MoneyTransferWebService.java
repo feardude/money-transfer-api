@@ -30,11 +30,11 @@ public class MoneyTransferWebService {
     }
 
     void run() {
-        before("/*",
+        before(
                 (request, response) -> log.info("{}: {}", request.requestMethod(), request.uri())
         );
 
-        after("/*",
+        after(
                 (request, response) -> log.info("{}: {}, response status = {}",
                         request.requestMethod(), request.uri(),
                         response.status(), response.body()
