@@ -8,16 +8,16 @@ import ru.smax.trial.revolut.dao.AccountsDao;
 import ru.smax.trial.revolut.exception.InsufficientFundsException;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static java.lang.String.format;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
-import static java.util.stream.Collectors.toList;
 import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.get;
 import static spark.Spark.post;
+import static spark.Spark.redirect;
 
 @Slf4j
 public class TransferWebService {
@@ -40,32 +40,24 @@ public class TransferWebService {
                 )
         );
 
-        get("/",
-                (request, response) ->
-                        "Money transfer trial for Revolut" +
-                                "<br>" +
-                                "<a href='/accounts'>Accounts</a>"
-        );
+        redirect.get("/", "/api");
 
-        get("/accounts",
+        get("api",
                 (request, response) -> {
-                    final List<String> accountLinks = accountsDao.getAccounts().stream()
-                            .map(account -> format(
-                                    "<a href='/accounts/%s'>%s</a>",
-                                    account.getId(),
-                                    account.toString()
-                            ))
-                            .collect(toList());
-                    return format("<a href='/'>Home</a> " +
-                                    "<br>" +
-                                    "%s",
-                            accountLinks
-                    );
+                    final Map<String, String> map = new HashMap<>();
+                    map.put("/accounts", "get");
+                    map.put("/accounts/:id", "get");
+                    map.put("/transfer", "post");
+                    return toJson(map);
                 }
         );
 
+        get("/accounts",
+                (request, response) -> toJson(accountsDao.getAccounts())
+        );
+
         get("/accounts/:id",
-                (request, response) -> accountsDao.getAccount(Long.valueOf(request.params("id"))).toString()
+                (request, response) -> toJson(accountsDao.getAccount(Long.valueOf(request.params("id"))))
         );
 
         post("/transfer",
@@ -79,10 +71,12 @@ public class TransferWebService {
                         );
 
                         accountsDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
-                        response.status(HTTP_OK);
-                        return format("Money were transferred successfully [from-account-id=%s, to-account-id=%s, amount=%s]",
+                        log.info("Money were transferred successfully [from-account-id={}, to-account-id={}, amount={}]",
                                 payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount()
                         );
+
+                        response.status(HTTP_OK);
+                        return "";
                     } catch (JsonProcessingException e) {
                         log.error("Invalid request payload", e);
                         response.status(HTTP_BAD_REQUEST);
@@ -94,5 +88,10 @@ public class TransferWebService {
                     }
                 }
         );
+    }
+
+    private String toJson(Object object) throws JsonProcessingException {
+        final ObjectMapper mapper = new ObjectMapper();
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
     }
 }
