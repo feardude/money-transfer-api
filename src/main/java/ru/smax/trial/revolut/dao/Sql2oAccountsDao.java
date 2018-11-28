@@ -1,6 +1,6 @@
 package ru.smax.trial.revolut.dao;
 
-import lombok.AllArgsConstructor;
+import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
@@ -12,10 +12,14 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-@AllArgsConstructor
 @Slf4j
 public class Sql2oAccountsDao implements AccountsDao {
     private final Sql2o sql2o;
+
+    @Inject
+    public Sql2oAccountsDao(Sql2o sql2o) {
+        this.sql2o = sql2o;
+    }
 
     @Override
     public List<Account> getAccounts() {
