@@ -55,15 +55,15 @@ public class MoneyTransferWebService {
                 }
         );
 
-        get("/accounts",
+        get("/api/accounts",
                 (request, response) -> toJson(accountService.getAccounts())
         );
 
-        get("/accounts/:id",
+        get("/api/accounts/:id",
                 (request, response) -> toJson(accountService.getAccount(Long.valueOf(request.params("id"))))
         );
 
-        post("/transfer",
+        post("/api/transfer",
                 (request, response) -> {
                     final ObjectMapper mapper = new ObjectMapper();
                     final TransferMoneyPayload payload = mapper.readValue(request.body(), TransferMoneyPayload.class);
