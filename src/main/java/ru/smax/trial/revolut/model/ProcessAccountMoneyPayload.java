@@ -12,13 +12,18 @@ import java.math.BigDecimal;
 @Getter
 @EqualsAndHashCode
 @ToString
-public class TransferMoneyPayload {
+public class ProcessAccountMoneyPayload {
     @NonNull
-    private final Long fromAccountId;
+    private final Action action;
 
     @NonNull
-    private final Long toAccountId;
+    private final Long accountId;
 
     @NonNull
     private final BigDecimal amount;
+
+    public enum Action {
+        DEPOSIT,
+        WITHDRAW
+    }
 }

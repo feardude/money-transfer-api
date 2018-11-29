@@ -5,7 +5,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.sql2o.Sql2o;
-import ru.smax.trial.revolut.exception.InsufficientFundsException;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -62,7 +61,7 @@ public class AccountDaoIT {
     }
 
     @Test
-    public void transferMoney_success() throws InsufficientFundsException {
+    public void transferMoney() {
         accountDao.transferMoney(1, 2, withScale(0.5d));
 
         final BigDecimal expected1 = withScale(999.5d);
@@ -72,6 +71,24 @@ public class AccountDaoIT {
         final BigDecimal expected2 = withScale(1000.5d);
         final BigDecimal actual2 = accountDao.getAccount(2L).getAmount();
         assertEquals(expected2, actual2);
+    }
+
+    @Test
+    public void depositMoney() {
+        accountDao.depositMoney(1, withScale(1d));
+
+        final BigDecimal expected1 = withScale(1001d);
+        final BigDecimal actual1 = accountDao.getAccount(1L).getAmount();
+        assertEquals(expected1, actual1);
+    }
+
+    @Test
+    public void withdrawMoney() {
+        accountDao.withdrawMoney(1, withScale(1d));
+
+        final BigDecimal expected1 = withScale(999d);
+        final BigDecimal actual1 = accountDao.getAccount(1L).getAmount();
+        assertEquals(expected1, actual1);
     }
 
 

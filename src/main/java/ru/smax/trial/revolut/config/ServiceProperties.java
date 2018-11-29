@@ -15,6 +15,10 @@ class ServiceProperties {
     private static final String PROPERTIES_FILE_PATH = "service.properties";
     private static final Map<String, String> PROPERTIES = readPropertiesFile();
 
+    private ServiceProperties() {
+        throw new InstantiationError("Not for instantiation!");
+    }
+
     private static Map<String, String> readPropertiesFile() {
         final InputStream propertiesInputStream = ServiceProperties.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE_PATH);
 

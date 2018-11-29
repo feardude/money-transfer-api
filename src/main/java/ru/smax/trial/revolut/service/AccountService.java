@@ -1,6 +1,7 @@
 package ru.smax.trial.revolut.service;
 
 import ru.smax.trial.revolut.model.Account;
+import ru.smax.trial.revolut.model.ProcessAccountMoneyPayload;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
 
 import java.util.List;
@@ -11,4 +12,6 @@ public interface AccountService {
     Account getAccount(long id);
 
     void transferMoney(TransferMoneyPayload payload);
+
+    void processAccountMoney(ProcessAccountMoneyPayload payload);
 }

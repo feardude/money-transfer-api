@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.smax.trial.revolut.exception.TransferMoneyException;
+import ru.smax.trial.revolut.model.ProcessAccountMoneyPayload;
 import ru.smax.trial.revolut.model.TransferMoneyPayload;
 import ru.smax.trial.revolut.service.AccountService;
 
@@ -61,6 +62,16 @@ public class MoneyTransferWebService {
 
         get("/api/accounts/:id",
                 (request, response) -> toJson(accountService.getAccount(Long.valueOf(request.params("id"))))
+        );
+
+        post("/api/accounts/:id",
+                (request, response) -> {
+                    final ObjectMapper mapper = new ObjectMapper();
+                    final ProcessAccountMoneyPayload payload = mapper.readValue(request.body(), ProcessAccountMoneyPayload.class);
+                    accountService.processAccountMoney(payload);
+                    response.status(HTTP_OK);
+                    return toJson(accountService.getAccount(payload.getAccountId()));
+                }
         );
 
         post("/api/transfer",

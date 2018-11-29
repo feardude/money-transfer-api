@@ -8,12 +8,29 @@ import ru.smax.trial.revolut.model.Account;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class Sql2oAccountsDao implements AccountDao {
+    private static final String PARAM_ACCOUNT_ID = "accountId";
+    private static final String PARAM_AMOUNT = "amount";
+
     private final Sql2o sql2o;
+    private final String withdrawMoney;
+    private final String depositMoney;
 
     @Inject
     public Sql2oAccountsDao(Sql2o sql2o) {
         this.sql2o = sql2o;
+
+        withdrawMoney = format("update accounts " +
+                "set amount = amount - :%s " +
+                "where id = :%s",
+                PARAM_AMOUNT, PARAM_ACCOUNT_ID);
+
+        depositMoney = format("update accounts " +
+                "set amount = amount + :%s " +
+                "where id = :%s",
+                PARAM_AMOUNT, PARAM_ACCOUNT_ID);
     }
 
     @Override
@@ -40,24 +57,38 @@ public class Sql2oAccountsDao implements AccountDao {
     @Override
     public void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount) {
         try (Connection conn = sql2o.beginTransaction()) {
-            final String withdrawMoney = "update accounts " +
-                    "set amount = amount - :amount " +
-                    "where id = :fromAccountId";
-
-            final String addMoney = "update accounts " +
-                    "set amount = amount + :amount " +
-                    "where id = :toAccountId";
-
             conn.createQuery(withdrawMoney)
-                    .addParameter("amount", amount)
-                    .addParameter("fromAccountId", fromAccountId)
+                    .addParameter(PARAM_ACCOUNT_ID, fromAccountId)
+                    .addParameter(PARAM_AMOUNT, amount)
                     .executeUpdate();
 
-            conn.createQuery(addMoney)
-                    .addParameter("amount", amount)
-                    .addParameter("toAccountId", toAccountId)
+            conn.createQuery(depositMoney)
+                    .addParameter(PARAM_ACCOUNT_ID, toAccountId)
+                    .addParameter(PARAM_AMOUNT, amount)
                     .executeUpdate();
 
+            conn.commit();
+        }
+    }
+
+    @Override
+    public void withdrawMoney(long accountId, BigDecimal amount) {
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(withdrawMoney)
+                    .addParameter(PARAM_ACCOUNT_ID, accountId)
+                    .addParameter(PARAM_AMOUNT, amount)
+                    .executeUpdate();
+            conn.commit();
+        }
+    }
+
+    @Override
+    public void depositMoney(long accountId, BigDecimal amount) {
+        try (Connection conn = sql2o.beginTransaction()) {
+            conn.createQuery(depositMoney)
+                    .addParameter(PARAM_ACCOUNT_ID, accountId)
+                    .addParameter(PARAM_AMOUNT, amount)
+                    .executeUpdate();
             conn.commit();
         }
     }
