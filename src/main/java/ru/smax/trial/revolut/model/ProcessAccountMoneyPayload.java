@@ -3,6 +3,7 @@ package ru.smax.trial.revolut.model;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 
 import java.math.BigDecimal;
@@ -12,8 +13,13 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 @ToString
 public class ProcessAccountMoneyPayload {
+    @NonNull
     private final Action action;
-    private final long accountId;
+
+    @NonNull
+    private final Long accountId;
+
+    @NonNull
     private final BigDecimal amount;
 
     public enum Action {

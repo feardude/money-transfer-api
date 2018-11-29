@@ -31,7 +31,7 @@ public class AccountServiceTest {
         when(dao.getAccount(1))
                 .thenReturn(Account.builder().amount(ONE).build());
 
-        final TransferMoneyPayload payload = new TransferMoneyPayload(1, 2, ONE);
+        final TransferMoneyPayload payload = new TransferMoneyPayload(1L, 2L, ONE);
         service.transferMoney(payload);
 
         verify(dao).getAccount(1);
@@ -47,7 +47,7 @@ public class AccountServiceTest {
         when(dao.getAccount(1))
                 .thenReturn(Account.builder().amount(ZERO).build());
 
-        final TransferMoneyPayload payload = new TransferMoneyPayload(1, 2, ONE);
+        final TransferMoneyPayload payload = new TransferMoneyPayload(1L, 2L, ONE);
         service.transferMoney(payload);
 
         verify(dao).getAccount(1);
@@ -56,7 +56,7 @@ public class AccountServiceTest {
 
     @Test
     public void processAccountMoney_deposit() {
-        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(DEPOSIT, 1, ONE);
+        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(DEPOSIT, 1L, ONE);
         service.processAccountMoney(payload);
         verify(dao).depositMoney(1, ONE);
         verifyNoMoreInteractions(dao);
@@ -67,7 +67,7 @@ public class AccountServiceTest {
         when(dao.getAccount(1))
                 .thenReturn(Account.builder().amount(ONE).build());
 
-        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(WITHDRAW, 1, ONE);
+        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(WITHDRAW, 1L, ONE);
         service.processAccountMoney(payload);
 
         verify(dao).getAccount(1);
@@ -83,7 +83,7 @@ public class AccountServiceTest {
         when(dao.getAccount(1))
                 .thenReturn(Account.builder().amount(ZERO).build());
 
-        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(WITHDRAW, 1, ONE);
+        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(WITHDRAW, 1L, ONE);
         service.processAccountMoney(payload);
 
         verify(dao).getAccount(1);
