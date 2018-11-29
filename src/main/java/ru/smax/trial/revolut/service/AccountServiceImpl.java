@@ -17,6 +17,7 @@ import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.WITH
 
 @Slf4j
 public class AccountServiceImpl implements AccountService {
+    private static final Object LOCK = new Object();
     private final AccountDao accountDao;
 
     @Inject
@@ -37,10 +38,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void transferMoney(TransferMoneyPayload payload) {
         log.info("Requested money transfer [{}]", payload.toString());
-        
-        verifyFundsSufficiency(payload.getFromAccountId(), payload.getAmount());
-        accountDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
-        
+
+        synchronized (LOCK) {
+            verifyFundsSufficiency(payload.getFromAccountId(), payload.getAmount());
+            accountDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
+        }
+
         log.info("Money were transferred successfully [{}]", payload.toString());
     }
 
@@ -48,13 +51,15 @@ public class AccountServiceImpl implements AccountService {
     public void processAccountMoney(ProcessAccountMoneyPayload payload) {
         log.info("Requested account money processing [{}]", payload.toString());
 
-        if (ADD == payload.getAction()) {
-            accountDao.addMoney(payload.getAccountId(), payload.getAmount());
-        }
+        synchronized (LOCK) {
+            if (ADD == payload.getAction()) {
+                accountDao.addMoney(payload.getAccountId(), payload.getAmount());
+            }
 
-        if (WITHDRAW == payload.getAction()) {
-            verifyFundsSufficiency(payload.getAccountId(), payload.getAmount());
-            accountDao.withdrawMoney(payload.getAccountId(), payload.getAmount());
+            if (WITHDRAW == payload.getAction()) {
+                verifyFundsSufficiency(payload.getAccountId(), payload.getAmount());
+                accountDao.withdrawMoney(payload.getAccountId(), payload.getAmount());
+            }
         }
 
         log.info("Account money were processed successfully [{}]", payload.toString());
