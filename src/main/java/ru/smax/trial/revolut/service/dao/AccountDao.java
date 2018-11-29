@@ -14,5 +14,5 @@ public interface AccountDao {
 
     void withdrawMoney(long accountId, BigDecimal amount);
 
-    void addMoney(long accountId, BigDecimal amount);
+    void depositMoney(long accountId, BigDecimal amount);
 }

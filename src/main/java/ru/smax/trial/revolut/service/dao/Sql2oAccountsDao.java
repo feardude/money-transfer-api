@@ -76,7 +76,7 @@ public class Sql2oAccountsDao implements AccountDao {
     }
 
     @Override
-    public void addMoney(long accountId, BigDecimal amount) {
+    public void depositMoney(long accountId, BigDecimal amount) {
         try (Connection conn = sql2o.beginTransaction()) {
             conn.createQuery(addMoney)
                     .addParameter("accountId", accountId)

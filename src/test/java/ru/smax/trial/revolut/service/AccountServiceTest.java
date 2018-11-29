@@ -16,7 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.ADD;
+import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.DEPOSIT;
 import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.WITHDRAW;
 
 public class AccountServiceTest {
@@ -55,10 +55,10 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void processAccountMoney_add() {
-        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(ADD, 1, ONE);
+    public void processAccountMoney_deposit() {
+        final ProcessAccountMoneyPayload payload = new ProcessAccountMoneyPayload(DEPOSIT, 1, ONE);
         service.processAccountMoney(payload);
-        verify(dao).addMoney(1, ONE);
+        verify(dao).depositMoney(1, ONE);
         verifyNoMoreInteractions(dao);
     }
 

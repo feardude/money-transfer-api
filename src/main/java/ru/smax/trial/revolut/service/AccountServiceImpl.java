@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static java.lang.String.format;
-import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.ADD;
+import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.DEPOSIT;
 import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.WITHDRAW;
 
 @Slf4j
@@ -52,8 +52,8 @@ public class AccountServiceImpl implements AccountService {
         log.info("Requested account money processing [{}]", payload.toString());
 
         synchronized (LOCK) {
-            if (ADD == payload.getAction()) {
-                accountDao.addMoney(payload.getAccountId(), payload.getAmount());
+            if (DEPOSIT == payload.getAction()) {
+                accountDao.depositMoney(payload.getAccountId(), payload.getAmount());
             }
 
             if (WITHDRAW == payload.getAction()) {

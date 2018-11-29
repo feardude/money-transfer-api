@@ -74,8 +74,8 @@ public class AccountDaoIT {
     }
 
     @Test
-    public void addMoney() {
-        accountDao.addMoney(1, withScale(1d));
+    public void depositMoney() {
+        accountDao.depositMoney(1, withScale(1d));
 
         final BigDecimal expected1 = withScale(1001d);
         final BigDecimal actual1 = accountDao.getAccount(1L).getAmount();

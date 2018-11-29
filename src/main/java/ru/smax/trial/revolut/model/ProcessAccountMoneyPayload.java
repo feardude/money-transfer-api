@@ -17,7 +17,7 @@ public class ProcessAccountMoneyPayload {
     private final BigDecimal amount;
 
     public enum Action {
-        ADD,
+        DEPOSIT,
         WITHDRAW
     }
 }
