@@ -18,6 +18,7 @@ import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
+import static spark.Spark.port;
 import static spark.Spark.post;
 import static spark.Spark.redirect;
 
@@ -31,6 +32,9 @@ public class MoneyTransferWebService {
     }
 
     void run() {
+        final int port = Integer.parseInt(System.getenv("PORT"));
+        port(port);
+
         before(
                 (request, response) -> log.info("{}: {}", request.requestMethod(), request.uri())
         );
