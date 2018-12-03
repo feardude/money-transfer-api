@@ -5,14 +5,17 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.sql2o.Sql2o;
+import ru.smax.trial.revolut.model.Account;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import static java.math.BigDecimal.ROUND_HALF_UP;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 public class AccountDaoIT {
@@ -58,6 +61,25 @@ public class AccountDaoIT {
             statement.executeUpdate("insert into accounts values (2, '2', 1000)");
             connection.commit();
         }
+    }
+
+    @Test
+    public void getAccounts() {
+        final List<Account> expected = asList(
+                Account.builder()
+                        .id(1)
+                        .idReal("1")
+                        .amount(BigDecimal.valueOf(1000).setScale(6, ROUND_HALF_UP))
+                        .build(),
+                Account.builder()
+                        .id(2)
+                        .idReal("2")
+                        .amount(BigDecimal.valueOf(1000).setScale(6, ROUND_HALF_UP))
+                        .build()
+        );
+        final List<Account> actual = accountDao.getAccounts();
+
+        assertEquals(expected, actual);
     }
 
     @Test
