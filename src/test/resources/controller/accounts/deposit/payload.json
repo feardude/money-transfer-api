@@ -1,0 +1,5 @@
+{
+  "action" : "DEPOSIT",
+  "accountId" : 1,
+  "amount" : 1
+}

@@ -23,16 +23,17 @@ import static spark.Spark.post;
 import static spark.Spark.redirect;
 
 @Slf4j
-public class MoneyTransferWebService {
+public class MoneyTransferController {
     private final AccountService accountService;
+    private final int port;
 
     @Inject
-    public MoneyTransferWebService(AccountService accountService) {
+    public MoneyTransferController(AccountService accountService, int port) {
         this.accountService = accountService;
+        this.port = port;
     }
 
     void run() {
-        final int port = Integer.parseInt(System.getenv("PORT"));
         port(port);
 
         before(

@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.sql2o.Sql2o;
-import ru.smax.trial.revolut.MoneyTransferWebService;
+import ru.smax.trial.revolut.MoneyTransferController;
 import ru.smax.trial.revolut.service.AccountService;
 import ru.smax.trial.revolut.service.AccountServiceImpl;
 import ru.smax.trial.revolut.service.dao.AccountDao;
@@ -18,8 +18,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static java.lang.Integer.parseInt;
+import static java.util.Objects.isNull;
+
 @Slf4j
 public class MoneyTransferConfig extends AbstractModule {
+    private static final int SPARK_DEFAULT_PORT = 4567;
+
     private final String dbUrl;
     private final String dbUsername;
     private final String dbPassword;
@@ -32,10 +37,16 @@ public class MoneyTransferConfig extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(MoneyTransferWebService.class).in(Singleton.class);
+        bind(MoneyTransferController.class).in(Singleton.class);
 
         bind(AccountService.class).to(AccountServiceImpl.class).in(Singleton.class);
         bind(AccountDao.class).to(Sql2oAccountsDao.class).in(Singleton.class);
+    }
+
+    @Provides
+    private int providePort() {
+        final String port = System.getenv("PORT");
+        return isNull(port) || port.isEmpty() ? SPARK_DEFAULT_PORT : parseInt(port);
     }
 
     @Provides
