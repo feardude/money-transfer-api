@@ -60,18 +60,8 @@ public class Sql2oAccountsDao implements AccountDao {
     @Override
     public void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount) {
         try (final Connection conn = sql2o.beginTransaction()) {
-            try (final Query query = conn.createQuery(withdrawMoney)) {
-                query.addParameter(PARAM_ACCOUNT_ID, fromAccountId)
-                        .addParameter(PARAM_AMOUNT, amount)
-                        .executeUpdate();
-            }
-
-            try (final Query query = conn.createQuery(depositMoney)) {
-                query.addParameter(PARAM_ACCOUNT_ID, toAccountId)
-                        .addParameter(PARAM_AMOUNT, amount)
-                        .executeUpdate();
-            }
-
+            doWithdrawMoney(conn, fromAccountId, amount);
+            doDepositMoney(conn, toAccountId, amount);
             conn.commit();
         }
     }
@@ -79,12 +69,7 @@ public class Sql2oAccountsDao implements AccountDao {
     @Override
     public void withdrawMoney(long accountId, BigDecimal amount) {
         try (final Connection conn = sql2o.beginTransaction()) {
-            try (final Query query = conn.createQuery(withdrawMoney)) {
-                query.addParameter(PARAM_ACCOUNT_ID, accountId)
-                        .addParameter(PARAM_AMOUNT, amount)
-                        .executeUpdate();
-            }
-
+            doWithdrawMoney(conn, accountId, amount);
             conn.commit();
         }
     }
@@ -92,12 +77,26 @@ public class Sql2oAccountsDao implements AccountDao {
     @Override
     public void depositMoney(long accountId, BigDecimal amount) {
         try (final Connection conn = sql2o.beginTransaction()) {
-            try (final Query query = conn.createQuery(depositMoney)) {
-                query.addParameter(PARAM_ACCOUNT_ID, accountId)
-                        .addParameter(PARAM_AMOUNT, amount)
-                        .executeUpdate();
-            }
+            doDepositMoney(conn, accountId, amount);
             conn.commit();
         }
+    }
+
+    private void doDepositMoney(Connection conn, long accountId, BigDecimal amount) {
+        try (final Query query = conn.createQuery(depositMoney)) {
+            processMoney(query, accountId, amount);
+        }
+    }
+
+    private void doWithdrawMoney(Connection conn, long accountId, BigDecimal amount) {
+        try (final Query query = conn.createQuery(withdrawMoney)) {
+            processMoney(query, accountId, amount);
+        }
+    }
+
+    private void processMoney(Query query, long accountId, BigDecimal amount) {
+        query.addParameter(PARAM_ACCOUNT_ID, accountId)
+                .addParameter(PARAM_AMOUNT, amount)
+                .executeUpdate();
     }
 }
