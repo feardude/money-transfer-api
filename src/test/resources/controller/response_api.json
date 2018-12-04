@@ -1,1 +1,1 @@
-{"/transfer":"post","/accounts":"get","/accounts/:id":"get"}
+{"/api/accounts/:id":"get, post","/api/accounts":"get","/transfer":"post"}

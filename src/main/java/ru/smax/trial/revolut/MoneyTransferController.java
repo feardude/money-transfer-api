@@ -54,8 +54,8 @@ public class MoneyTransferController {
         get("/api",
                 (request, response) -> {
                     final Map<String, String> map = new HashMap<>();
-                    map.put("/accounts", "get");
-                    map.put("/accounts/:id", "get");
+                    map.put("/api/accounts", "get");
+                    map.put("/api/accounts/:id", "get, post");
                     map.put("/transfer", "post");
                     return toJson(map);
                 }
