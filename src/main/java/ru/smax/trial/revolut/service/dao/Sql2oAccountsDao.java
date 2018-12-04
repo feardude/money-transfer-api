@@ -2,6 +2,7 @@ package ru.smax.trial.revolut.service.dao;
 
 import com.google.inject.Inject;
 import org.sql2o.Connection;
+import org.sql2o.Query;
 import org.sql2o.Sql2o;
 import ru.smax.trial.revolut.model.Account;
 
@@ -23,49 +24,53 @@ public class Sql2oAccountsDao implements AccountDao {
         this.sql2o = sql2o;
 
         withdrawMoney = format("update accounts " +
-                "set amount = amount - :%s " +
-                "where id = :%s",
+                        "set amount = amount - :%s " +
+                        "where id = :%s",
                 PARAM_AMOUNT, PARAM_ACCOUNT_ID);
 
         depositMoney = format("update accounts " +
-                "set amount = amount + :%s " +
-                "where id = :%s",
+                        "set amount = amount + :%s " +
+                        "where id = :%s",
                 PARAM_AMOUNT, PARAM_ACCOUNT_ID);
     }
 
     @Override
     public List<Account> getAccounts() {
-        try (Connection conn = sql2o.open()) {
+        try (final Connection conn = sql2o.open()) {
             final String selectAccounts = "select * from accounts";
 
-            return conn.createQuery(selectAccounts)
-                    .executeAndFetch(Account.class);
+            try (final Query query = conn.createQuery(selectAccounts)) {
+                return query.executeAndFetch(Account.class);
+            }
         }
     }
 
     @Override
     public Account getAccount(long id) {
-        try (Connection conn = sql2o.open()) {
+        try (final Connection conn = sql2o.open()) {
             final String selectAccount = "select * from accounts where id = :id";
 
-            return conn.createQuery(selectAccount)
-                    .addParameter("id", id)
-                    .executeAndFetchFirst(Account.class);
+            try (final Query query = conn.createQuery(selectAccount)) {
+                return query.addParameter("id", id)
+                        .executeAndFetchFirst(Account.class);
+            }
         }
     }
 
     @Override
     public void transferMoney(long fromAccountId, long toAccountId, BigDecimal amount) {
-        try (Connection conn = sql2o.beginTransaction()) {
-            conn.createQuery(withdrawMoney)
-                    .addParameter(PARAM_ACCOUNT_ID, fromAccountId)
-                    .addParameter(PARAM_AMOUNT, amount)
-                    .executeUpdate();
+        try (final Connection conn = sql2o.beginTransaction()) {
+            try (final Query query = conn.createQuery(withdrawMoney)) {
+                query.addParameter(PARAM_ACCOUNT_ID, fromAccountId)
+                        .addParameter(PARAM_AMOUNT, amount)
+                        .executeUpdate();
+            }
 
-            conn.createQuery(depositMoney)
-                    .addParameter(PARAM_ACCOUNT_ID, toAccountId)
-                    .addParameter(PARAM_AMOUNT, amount)
-                    .executeUpdate();
+            try (final Query query = conn.createQuery(depositMoney)) {
+                query.addParameter(PARAM_ACCOUNT_ID, toAccountId)
+                        .addParameter(PARAM_AMOUNT, amount)
+                        .executeUpdate();
+            }
 
             conn.commit();
         }
@@ -73,22 +78,25 @@ public class Sql2oAccountsDao implements AccountDao {
 
     @Override
     public void withdrawMoney(long accountId, BigDecimal amount) {
-        try (Connection conn = sql2o.beginTransaction()) {
-            conn.createQuery(withdrawMoney)
-                    .addParameter(PARAM_ACCOUNT_ID, accountId)
-                    .addParameter(PARAM_AMOUNT, amount)
-                    .executeUpdate();
+        try (final Connection conn = sql2o.beginTransaction()) {
+            try (final Query query = conn.createQuery(withdrawMoney)) {
+                query.addParameter(PARAM_ACCOUNT_ID, accountId)
+                        .addParameter(PARAM_AMOUNT, amount)
+                        .executeUpdate();
+            }
+
             conn.commit();
         }
     }
 
     @Override
     public void depositMoney(long accountId, BigDecimal amount) {
-        try (Connection conn = sql2o.beginTransaction()) {
-            conn.createQuery(depositMoney)
-                    .addParameter(PARAM_ACCOUNT_ID, accountId)
-                    .addParameter(PARAM_AMOUNT, amount)
-                    .executeUpdate();
+        try (final Connection conn = sql2o.beginTransaction()) {
+            try (final Query query = conn.createQuery(depositMoney)) {
+                query.addParameter(PARAM_ACCOUNT_ID, accountId)
+                        .addParameter(PARAM_AMOUNT, amount)
+                        .executeUpdate();
+            }
             conn.commit();
         }
     }
