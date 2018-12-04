@@ -10,6 +10,11 @@ The application represents API for processing accounts' money.
 No authentication, so anyone can see any account's balance. 
 Real application should grant balance access only to account's owner.
 
+
+For local run follow these steps:
+1. ./gradlew assemble check stage
+2. java -jar build/libs/money-transfer-api-all-*.jar
+
 ---
 ### Architecture
 - **SparkJava** web framework.
