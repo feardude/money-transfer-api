@@ -44,7 +44,7 @@ public class AccountServiceImpl implements AccountService {
             accountDao.transferMoney(payload.getFromAccountId(), payload.getToAccountId(), payload.getAmount());
         }
 
-        log.info("Money were transferred successfully [{}]", payload.toString());
+        log.info("Money was transferred successfully [{}]", payload.toString());
     }
 
     @Override
@@ -62,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        log.info("Account money were processed successfully [{}]", payload.toString());
+        log.info("Account money was processed successfully [{}]", payload.toString());
     }
 
     private void verifyFundsSufficiency(long fromAccountId, BigDecimal amountToWithdraw) {
