@@ -68,7 +68,7 @@ jacocoTestReport {
 
 task fatJar(type: Jar) {
     manifest {
-        attributes "Main-Class": "ru.smax.trial.revolut.MoneyTransferApplication"
+        attributes "Main-Class": "ru.smax.trial.revolut.MoneyTransferStarter"
     }
 
     baseName = project.name + '-all'
