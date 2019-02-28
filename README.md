@@ -75,10 +75,3 @@ Body payload:
 
 Returns empty string in case of success. Returns _InsufficientFundsException_ if from-account has not enough money.
 
----
-### Known issues
-- Poor in-memory DB initializing. Scripts (creating schema and tables, populating tables) should be moved to specific config for more flexibility and testability. Consider removing duplication in integration test and main config.
-- No tests for exception handling in Spark controller. Consider using another spark-test library or writing own test infrastructure.
-- SQL scripts are defined inside Dao object. Consider moving scripts to external config (resource file or Config class).
-- No proofs of proper concurrent logic. Need to add concurrent tests.
-- No stress tests/benchmarks.
