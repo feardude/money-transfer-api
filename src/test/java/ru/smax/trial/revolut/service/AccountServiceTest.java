@@ -1,14 +1,5 @@
 package ru.smax.trial.revolut.service;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import ru.smax.trial.revolut.exception.InsufficientFundsException;
-import ru.smax.trial.revolut.model.Account;
-import ru.smax.trial.revolut.model.ProcessAccountMoneyPayload;
-import ru.smax.trial.revolut.model.TransferMoneyPayload;
-import ru.smax.trial.revolut.service.dao.AccountDao;
-
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static org.junit.rules.ExpectedException.none;
@@ -19,9 +10,24 @@ import static org.mockito.Mockito.when;
 import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.DEPOSIT;
 import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.WITHDRAW;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import ru.smax.trial.revolut.exception.InsufficientFundsException;
+import ru.smax.trial.revolut.model.Account;
+import ru.smax.trial.revolut.model.ProcessAccountMoneyPayload;
+import ru.smax.trial.revolut.model.TransferMoneyPayload;
+import ru.smax.trial.revolut.service.dao.AccountDao;
+
 public class AccountServiceTest {
     private final AccountDao dao = mock(AccountDao.class);
-    private final AccountService service = new AccountServiceImpl(dao);
+    private final ConcurrentMap<Long, Lock> accountIdToLock = new ConcurrentHashMap<>();
+    private final AccountService service = new AccountServiceImpl(dao, accountIdToLock);
 
     @Rule
     public final ExpectedException expectedException = none();
