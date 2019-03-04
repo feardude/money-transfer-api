@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
 
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.sql2o.Sql2o;
@@ -49,20 +50,23 @@ public class MoneyTransferConfig extends AbstractModule {
     }
 
     @Provides
-    private ConcurrentMap provideServiceLockMap() {
-        return new ConcurrentHashMap();
-    }
-
-    @Provides
     private int providePort() {
         final String port = System.getenv("PORT");
-        return isNull(port) || port.isEmpty() ? SPARK_DEFAULT_PORT : parseInt(port);
+        return isNull(port) || port.isEmpty()
+                ? SPARK_DEFAULT_PORT
+                : parseInt(port);
     }
 
     @Provides
     @Singleton
-    private Sql2o provideSql2o() {
-        return new Sql2o(provideDataSource());
+    private ConcurrentMap<Long, Lock> provideServiceLockMap() {
+        return new ConcurrentHashMap<>();
+    }
+
+    @Provides
+    @Singleton
+    private Sql2o provideSql2o(DataSource dataSource) {
+        return new Sql2o(dataSource);
     }
 
     @Provides
@@ -84,10 +88,10 @@ public class MoneyTransferConfig extends AbstractModule {
 
             statement.execute(
                     "create table if not exists accounts (" +
-                            "  id int primary key," +
-                            "  idReal varchar(128) unique not null," +
-                            "  amount decimal(10,6) default 0" +
-                            ")"
+                    "  id int primary key," +
+                    "  idReal varchar(128) unique not null," +
+                    "  amount decimal(10,6) default 0" +
+                    ")"
             );
             connection.commit();
 
@@ -95,7 +99,8 @@ public class MoneyTransferConfig extends AbstractModule {
             statement.executeUpdate("insert into accounts values (1, '1', 1000)");
             statement.executeUpdate("insert into accounts values (2, '2', 1000)");
             connection.commit();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             log.error("Could not populate database", e);
             System.exit(1);
         }
