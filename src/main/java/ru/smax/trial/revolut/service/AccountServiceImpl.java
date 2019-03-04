@@ -23,8 +23,6 @@ import ru.smax.trial.revolut.service.dao.AccountDao;
 
 @Slf4j
 public class AccountServiceImpl implements AccountService {
-    private static final Object LOCK = new Object();
-
     private final ConcurrentMap<Long, Lock> accountIdToLock;
     private final AccountDao accountDao;
 
@@ -77,14 +75,27 @@ public class AccountServiceImpl implements AccountService {
     public void processAccountMoney(ProcessAccountMoneyPayload payload) {
         log.info("Requested account money processing [{}]", payload.toString());
 
-        synchronized (LOCK) {
-            if (DEPOSIT == payload.getAction()) {
-                accountDao.depositMoney(payload.getAccountId(), payload.getAmount());
-            }
+        final Long accountId = payload.getAccountId();
+        final Lock lock = getLock(accountId);
 
-            if (WITHDRAW == payload.getAction()) {
-                verifyFundsSufficiency(payload.getAccountId(), payload.getAmount());
-                accountDao.withdrawMoney(payload.getAccountId(), payload.getAmount());
+        if (DEPOSIT == payload.getAction()) {
+            try {
+                lock.lock();
+                accountDao.depositMoney(accountId, payload.getAmount());
+            }
+            finally {
+                lock.unlock();
+            }
+        }
+
+        if (WITHDRAW == payload.getAction()) {
+            try {
+                lock.lock();
+                verifyFundsSufficiency(accountId, payload.getAmount());
+                accountDao.withdrawMoney(accountId, payload.getAmount());
+            }
+            finally {
+                lock.unlock();
             }
         }
 
