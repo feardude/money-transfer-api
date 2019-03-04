@@ -49,24 +49,19 @@ public class AccountServiceImpl implements AccountService {
         final Long fromAccountId = payload.getFromAccountId();
         final Lock fromAccountLock = getLock(fromAccountId);
 
-        try {
-            fromAccountLock.lock();
-            verifyFundsSufficiency(fromAccountId, payload.getAmount());
+        doWorkSynced(
+                fromAccountLock,
+                () -> {
+                    verifyFundsSufficiency(fromAccountId, payload.getAmount());
 
-            final Long toAccountId = payload.getToAccountId();
-            final Lock toAccountLock = getLock(toAccountId);
-
-            try {
-                toAccountLock.lock();
-                accountDao.transferMoney(fromAccountId, toAccountId, payload.getAmount());
-            }
-            finally {
-                toAccountLock.unlock();
-            }
-        }
-        finally {
-            fromAccountLock.unlock();
-        }
+                    final Long toAccountId = payload.getToAccountId();
+                    final Lock toAccountLock = getLock(toAccountId);
+                    doWorkSynced(
+                            toAccountLock,
+                            () -> accountDao.transferMoney(fromAccountId, toAccountId, payload.getAmount())
+                    );
+                }
+        );
 
         log.info("Money was transferred successfully [{}]", payload.toString());
     }
@@ -79,24 +74,20 @@ public class AccountServiceImpl implements AccountService {
         final Lock lock = getLock(accountId);
 
         if (DEPOSIT == payload.getAction()) {
-            try {
-                lock.lock();
-                accountDao.depositMoney(accountId, payload.getAmount());
-            }
-            finally {
-                lock.unlock();
-            }
+            doWorkSynced(
+                    lock,
+                    () -> accountDao.depositMoney(accountId, payload.getAmount())
+            );
         }
 
         if (WITHDRAW == payload.getAction()) {
-            try {
-                lock.lock();
-                verifyFundsSufficiency(accountId, payload.getAmount());
-                accountDao.withdrawMoney(accountId, payload.getAmount());
-            }
-            finally {
-                lock.unlock();
-            }
+            doWorkSynced(
+                    lock,
+                    () -> {
+                        verifyFundsSufficiency(accountId, payload.getAmount());
+                        accountDao.withdrawMoney(accountId, payload.getAmount());
+                    }
+            );
         }
 
         log.info("Account money was processed successfully [{}]", payload.toString());
@@ -117,5 +108,20 @@ public class AccountServiceImpl implements AccountService {
                 accountId,
                 id -> new ReentrantLock(true)
         );
+    }
+
+    private void doWorkSynced(Lock lock, Worker worker) {
+        try {
+            lock.lock();
+            worker.doWork();
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+
+    @FunctionalInterface
+    private interface Worker {
+        void doWork();
     }
 }
