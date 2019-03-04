@@ -6,7 +6,6 @@ import static ru.smax.trial.revolut.model.ProcessAccountMoneyPayload.Action.WITH
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -27,9 +26,9 @@ public class AccountServiceImpl implements AccountService {
     private final AccountDao accountDao;
 
     @Inject
-    public AccountServiceImpl(AccountDao accountDao) {
+    public AccountServiceImpl(AccountDao accountDao, ConcurrentMap<Long, Lock> accountIdToLock) {
         this.accountDao = accountDao;
-        this.accountIdToLock = new ConcurrentHashMap<>();
+        this.accountIdToLock = accountIdToLock;
     }
 
     @Override

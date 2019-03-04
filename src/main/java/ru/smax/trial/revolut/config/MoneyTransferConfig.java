@@ -1,25 +1,30 @@
 package ru.smax.trial.revolut.config;
 
+import static java.lang.Integer.parseInt;
+import static java.util.Objects.isNull;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import org.hsqldb.jdbc.JDBCDataSource;
+import org.sql2o.Sql2o;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.hsqldb.jdbc.JDBCDataSource;
-import org.sql2o.Sql2o;
+
 import ru.smax.trial.revolut.MoneyTransferController;
 import ru.smax.trial.revolut.service.AccountService;
 import ru.smax.trial.revolut.service.AccountServiceImpl;
 import ru.smax.trial.revolut.service.dao.AccountDao;
 import ru.smax.trial.revolut.service.dao.Sql2oAccountsDao;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static java.lang.Integer.parseInt;
-import static java.util.Objects.isNull;
 
 @Slf4j
 public class MoneyTransferConfig extends AbstractModule {
@@ -41,6 +46,11 @@ public class MoneyTransferConfig extends AbstractModule {
 
         bind(AccountService.class).to(AccountServiceImpl.class).in(Singleton.class);
         bind(AccountDao.class).to(Sql2oAccountsDao.class).in(Singleton.class);
+    }
+
+    @Provides
+    private ConcurrentMap provideServiceLockMap() {
+        return new ConcurrentHashMap();
     }
 
     @Provides
